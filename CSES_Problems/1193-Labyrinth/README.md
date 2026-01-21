@@ -9,36 +9,53 @@ You are given a map of a labyrinth, and your task is to find a path from start t
 ## Solution
 
 ```cpp
-#include <bits/stdc++.h>
-using namespace std;
-const int mod = 1e9 + 7;
-const int inf = INT_MAX;
-const int m_inf = INT_MIN;
+#include <stdio.h>
+#include <string.h>
+
+#define MAXN 1005
 #define int long long
+
 int sx, sy, ex, ey, n, m;
-vector<vector<int>> vis;
-vector<vector<char>> par;
-vector<vector<char>> grid;
-vector<char> ans;
-vector<int> dr = {-1, 0, 1, 0};
-vector<int> dc = {0, 1, 0, -1};
+
+char grid[MAXN][MAXN];
+char par[MAXN][MAXN];
+int vis[MAXN][MAXN];
+
+int dr[4] = {-1, 0, 1, 0};
+int dc[4] = {0, 1, 0, -1};
 char dir[4] = {'U', 'R', 'D', 'L'};
 
-void fastIO()
+/* Simple queue implementation */
+int qx[MAXN * MAXN];
+int qy[MAXN * MAXN];
+int front = 0, rear = 0;
+
+void push(int x, int y)
 {
-    ios::sync_with_stdio(false);
-    cin.tie(NULL);
+    qx[rear] = x;
+    qy[rear] = y;
+    rear++;
 }
+
+void pop()
+{
+    front++;
+}
+
+int empty()
+{
+    return front == rear;
+}
+
 void solve()
 {
-    cin >> n >> m;
-    grid.resize(n, vector<char>(m));
-    par.resize(n, vector<char>(m));
-    vis.resize(n, vector<int>(m, 0));
+    scanf("%lld %lld", &n, &m);
+
     for (int i = 0; i < n; i++)
     for (int j = 0; j < m; j++)
     {
-        cin >> grid[i][j];
+        scanf(" %c", &grid[i][j]);
+
         if (grid[i][j] == 'A')
         {
             sx = i;
@@ -50,18 +67,23 @@ void solve()
             ey = j;
         }
     }
-    queue<pair<int, int>> q;
-    q.push({sx, sy});
+
+    memset(vis, 0, sizeof(vis));
+
+    push(sx, sy);
     vis[sx][sy] = 1;
 
-    while (!q.empty())
+    while (!empty())
     {
-        int x = q.front().first, y = q.front().second;
-        q.pop();
+        int x = qx[front];
+        int y = qy[front];
+        pop();
 
         for (int i = 0; i < 4; i++)
         {
-            int nx = x + dr[i], ny = y + dc[i];
+            int nx = x + dr[i];
+            int ny = y + dc[i];
+
             if (nx < 0 || ny < 0 || nx >= n || ny >= m)
             continue;
             if (grid[nx][ny] == '#' || vis[nx][ny])
@@ -69,26 +91,29 @@ void solve()
 
             vis[nx][ny] = 1;
             par[nx][ny] = dir[i];
+
             if (nx == ex && ny == ey)
             break;
 
-            q.push({nx, ny});
+            push(nx, ny);
         }
     }
 
     if (!vis[ex][ey])
     {
-        cout << "NO\n";
+        printf("NO\n");
         return;
     }
 
-    string path = "";
+    char path[MAXN * MAXN];
+    int len = 0;
+
     int x = ex, y = ey;
 
     while (x != sx || y != sy)
     {
         char d = par[x][y];
-        path.push_back(d);
+        path[len++] = d;
 
         if (d == 'U')
         x++;
@@ -100,16 +125,25 @@ void solve()
         y--;
     }
 
-    reverse(path.begin(), path.end());
+    /* reverse path */
+    for (int i = 0; i < len / 2; i++)
+    {
+        char tmp = path[i];
+        path[i] = path[len - i - 1];
+        path[len - i - 1] = tmp;
+    }
 
-    cout << "YES\n"
-    << path.size() << "\n"
-    << path << "\n";
+    printf("YES\n");
+    printf("%lld\n", len);
+
+    for (int i = 0; i < len; i++)
+    printf("%c", path[i]);
+
+    printf("\n");
 }
 
 signed main()
 {
-    fastIO();
     solve();
     return 0;
 }
