@@ -69,6 +69,9 @@ void solve()
 
             vis[nx][ny] = 1;
             par[nx][ny] = dir[i];
+            if (nx == ex && ny == ey)
+            break;
+
             q.push({nx, ny});
         }
     }
